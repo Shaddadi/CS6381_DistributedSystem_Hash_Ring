@@ -18,6 +18,7 @@ import sys
 
 import zmq
 from random import randrange
+import time
 
 class Publisher:
 	"""Implementation of a publisher"""
@@ -45,6 +46,7 @@ class Publisher:
 			relhumidity = randrange(10, 60)
 			#print ("Sending: %i %i %i" % (zipcode, temperature, relhumidity))
 			self.socket.send_string("%i %i %i %i %i" % (zipcode, temperature, relhumidity, self.strength, history))
+			time.sleep(0.2)
 
 	def close(self):
 		""" This method closes the PyZMQ socket. """

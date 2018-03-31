@@ -64,8 +64,6 @@ class Proxy:
     def sendToSubscriber(self, zipcode):
         sub_msg = self.mc_object.get(zipcode)
         print(sub_msg)
-
-        self.xpubsocket.send_multipart (sub_msg)
         if self.newSub:
             ctx = zmq.Context()
             pub = ctx.socket(zmq.PUB)
@@ -149,7 +147,6 @@ class Proxy:
             events = dict (self.poller.poll (10000))
             # Is there any data from publisher?
             if self.xsubsocket in events:
-                print("still in events??")
                 msg = self.xsubsocket.recv_multipart()
                 #print ("Publication = {}".format (msg))
                 content= msg[0]
