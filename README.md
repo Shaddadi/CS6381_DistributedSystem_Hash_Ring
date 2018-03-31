@@ -8,7 +8,10 @@ Ran Hao (rxh349@case.edu) Xiaodong Yang (xiaodong.yang@vanderbilt.edu) Tong Lian
 
 ## Dependences
 - memcached: sudo apt-get install memcached (https://github.com/memcached/memcached)
-- hash_ring: https://pypi.python.org/pypi/hash_ring
+- hash_ring: https://pypi.python.org/pypi/hash_ring, please download and extract, then put hash_ring.py and memcache_ring.py in the same folder with our codes.
+- pip install python-memcached
+
+
 
 ## When running the server node:
 - First do 'memcached -u "your username" -d -m 64 127.0.0.3 -p 11211'
