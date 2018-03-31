@@ -6,11 +6,8 @@
 #
 # We are executing these samples on a Mininet-emulated environment
 #
-#
-
-#
-#   Weather update server
-#   Publishes random weather updates
+#  Weather update server
+#  Publishes random weather updates
 #  Connects to a xsub on port 5555
 #
 

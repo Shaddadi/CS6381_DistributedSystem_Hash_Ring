@@ -2,7 +2,6 @@ from hash_ring import HashRing
 from memcache_ring import MemcacheRing
 import memcache
 
-# system and time
 import os
 import sys
 import time
@@ -10,14 +9,11 @@ import threading
 import zmq
 from random import randrange
 
-
 class Proxy:
     """Implementation of the proxy"""
-
     def __init__(self):
         # Get the context
-        # This is a proxy. We create the XSUB and XPUB endpoints
-        #print ("This is proxy: creating xsub and xpubsockets")
+        # Use XPUB/XSUB to get multiple contents from different publishers
         self.context = zmq.Context()
         self.xsubsocket = self.context.socket(zmq.XSUB)
         self.xsubsocket.bind("tcp://*:5555")
@@ -121,7 +117,7 @@ class Proxy:
                 cur_msg = pre_msg
                 count = 0
 
-        #update the info vector
+        #update the info vector fro this topic
         info[0] = cur_strength
         info[1] = pre_strength
         info[2] = count
@@ -138,7 +134,6 @@ class Proxy:
         return cur_msg, histry_msg
 
     def schedule(self):
-
         topic_info_queue = []
         topicInd = 0
         zip_list = []
@@ -148,7 +143,6 @@ class Proxy:
             # Is there any data from publisher?
             if self.xsubsocket in events:
                 msg = self.xsubsocket.recv_multipart()
-                #print ("Publication = {}".format (msg))
                 content= msg[0]
                 zipcode, temperature, relhumidity, ownership, history = content.split(" ")
                 
@@ -178,7 +172,7 @@ class Proxy:
 
                 #Now register for the topic
                 self.registerHashRing(zipcode, topic_msg)
-                if self.newSub:
+                if self.newSub:#if it is a new subscriber, send the history messages
                     self.registerHashRing(zipcode, histry_msg)
 
                 #Send the msg to the registered subscriber, give the key
