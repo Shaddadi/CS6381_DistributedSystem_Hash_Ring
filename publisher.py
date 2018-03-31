@@ -36,11 +36,11 @@ class Publisher:
 		self.socket.connect(connect_str)
 		#print "connected!"
 
-	def publish(self):
+	def publish(self,zipcode):
 		# Keep publishing
 		history = 3
+		zipcode = int(zipcode.decode('ascii'))
 		while True:
-			zipcode = randrange(1, 100000)
 			temperature = randrange(-80, 135)
 			relhumidity = randrange(10, 60)
 			#print ("Sending: %i %i %i" % (zipcode, temperature, relhumidity))
@@ -52,11 +52,10 @@ class Publisher:
 
 if __name__ == '__main__':
 	broker = sys.argv[1] if len(sys.argv) > 1 else "127.0.0.1"
-	strength = 2
-	if len(sys.argv) > 2:
-		strength =  sys.argv[2]
-		strength = int(strength)
+	strength = int(sys.argv[2]) if len(sys.argv) > 2 else 2
+	zipcode = sys.argv[3] if len(sys.argv) > 3 else '10001'
+	print('input zip:',zipcode)
 	#pub = Publisher(broker, strength)
 	pub = Publisher(broker,strength)
-	pub.publish()
+	pub.publish(zipcode)
 
