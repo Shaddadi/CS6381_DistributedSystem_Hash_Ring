@@ -57,9 +57,9 @@ class Proxy:
         self.mc_object.set(zipcode, msg)
         # print self.mc_object.get(zipcode)
 
-    def sendToSubscriber(self, zipcode):
+    def sendToSubscriber(self, zipcode, histry_msg, ownership, strengh_vec):
         sub_msg = self.mc_object.get(zipcode)
-        print(sub_msg)
+        #print(sub_msg)
         if self.newSub:
             ctx = zmq.Context()
             pub = ctx.socket(zmq.PUB)
@@ -131,7 +131,7 @@ class Proxy:
         histInd = strengh_vec.index(cur_strength)
         histry_msg = history_vec[histInd]
 
-        return cur_msg, histry_msg
+        return cur_msg, histry_msg, ownership, strengh_vec
 
     def schedule(self):
         topic_info_queue = []
@@ -162,12 +162,12 @@ class Proxy:
                     topic_info = [cur_strength, pre_strength, count, history_vec, strengh_vec, pubInd, pre_msg, cur_msg]
                     topic_info_queue.append(topic_info)
                     #start to collect the msg for the new topic
-                    topic_msg, histry_msg = self.scheduleInTopic(topic_info_queue[topicInd], msg)
+                    topic_msg, histry_msg, ownership, strengh_vec = self.scheduleInTopic(topic_info_queue[topicInd], msg)
                     topicInd +=1
 
                 else:
                     zipInd = zip_list.index(zipcode)
-                    topic_msg, histry_msg = self.scheduleInTopic(topic_info_queue[zipInd], msg)
+                    topic_msg, histry_msg, ownership, strengh_vec = self.scheduleInTopic(topic_info_queue[zipInd], msg)
                     
 
                 #Now register for the topic
@@ -176,7 +176,7 @@ class Proxy:
                     self.registerHashRing(zipcode, histry_msg)
 
                 #Send the msg to the registered subscriber, give the key
-                self.sendToSubscriber(zipcode)
+                self.sendToSubscriber(zipcode, histry_msg, ownership, strengh_vec)
 
             if self.xpubsocket in events:
                 msg = self.xpubsocket.recv_multipart()
