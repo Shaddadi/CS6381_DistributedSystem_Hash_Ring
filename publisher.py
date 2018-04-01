@@ -12,14 +12,12 @@
 #
 
 import sys
-
 import zmq
 from random import randrange
 import time
 
 class Publisher:
 	"""Implementation of a publisher"""
-
 	def __init__(self, broker_addr, ownership_strength):
 		self.broker = broker_addr
 		self.strength = ownership_strength
@@ -27,9 +25,7 @@ class Publisher:
 		self.context = zmq.Context()
 		self.socket = self.context.socket(zmq.PUB)
 		# Connet to the broker
-		#context = zmq.Context()
 		connect_str = "tcp://" + self.broker + ":5555"
-		#socket = context.socket(zmq.PUB)
 		#print ("Publisher connecting to proxy at: {}".format(connect_str))
 		self.socket.connect(connect_str)
 		#print "connected!"
@@ -54,7 +50,7 @@ if __name__ == '__main__':
 	strength = int(sys.argv[2]) if len(sys.argv) > 2 else 2
 	zipcode = sys.argv[3] if len(sys.argv) > 3 else '10001'
 	print('input zip:',zipcode)
-	#pub = Publisher(broker, strength)
+
 	pub = Publisher(broker,strength)
 	pub.publish(zipcode)
 

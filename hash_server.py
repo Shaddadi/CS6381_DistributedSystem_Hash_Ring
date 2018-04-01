@@ -1,3 +1,12 @@
+# Sample code for CS6381
+# Vanderbilt University
+# Instructor: Aniruddha Gokhale
+#
+# Code taken from ZeroMQ examples with additional
+# comments or extra statements added to make the code
+# more self-explanatory or tweak it for our purposes
+#
+# We are executing these samples on a Mininet-emulated environment
 from hash_ring import HashRing
 from memcache_ring import MemcacheRing
 import memcache
@@ -12,7 +21,6 @@ from random import randrange
 class Proxy:
     """Implementation of the proxy"""
     def __init__(self):
-        # Get the context
         # Use XPUB/XSUB to get multiple contents from different publishers
         self.context = zmq.Context()
         self.xsubsocket = self.context.socket(zmq.XSUB)
@@ -32,7 +40,7 @@ class Proxy:
         self.global_url = 0
         self.global_port = 0
         self.newSub = False 
-
+        #The memcache object, with three serveres should be enough
         self.mc_object = MemcacheRing(['127.0.0.1:11211','127.0.0.2:11211', '127.0.0.3:11211'])
 
     def background_input(self):
@@ -55,12 +63,11 @@ class Proxy:
 
     def registerHashRing(self, zipcode, msg):            
         self.mc_object.set(zipcode, msg)
-        # print self.mc_object.get(zipcode)
 
     def sendToSubscriber(self, zipcode, histry_msg, ownership, strengh_vec):
         sub_msg = self.mc_object.get(zipcode)
         #print(sub_msg)
-        if self.newSub:
+        if self.newSub: #Want to send the history message here when only the new subscriber is active
             ctx = zmq.Context()
             pub = ctx.socket(zmq.PUB)
             pub.bind(self.global_url)
@@ -78,7 +85,7 @@ class Proxy:
             self.xpubsocket.bind(xurl)
             self.newSub = False
         else:
-            self.xpubsocket.send_multipart (sub_msg)
+            self.xpubsocket.send_multipart (sub_msg) #send the message by xpub
 
     def scheduleInTopic(self, info, msg):
         [cur_strength, pre_strength, count, history_vec, strengh_vec, pubInd, pre_msg, cur_msg] = info
@@ -100,7 +107,7 @@ class Proxy:
             curInd = strengh_vec.index(ownership)
             history_vec = self.history_vector(history_vec, curInd, history, msg)
 
-        #get the highest ownership msg to register the hash ring
+        #get the highest ownership msg to register the hash ring, using a heartbeat listener
         if ownership > cur_strength:
             pre_strength = cur_strength
             cur_strength = ownership
@@ -134,9 +141,9 @@ class Proxy:
         return cur_msg, histry_msg, ownership, strengh_vec
 
     def schedule(self):
-        topic_info_queue = []
+        topic_info_queue = [] #the content queue for different topic (zipcode)
         topicInd = 0
-        zip_list = []
+        zip_list = [] #the ziplist to keep track with the zipcodes received
         
         while True:
             events = dict (self.poller.poll (10000))
@@ -146,7 +153,7 @@ class Proxy:
                 content= msg[0]
                 zipcode, temperature, relhumidity, ownership, history = content.split(" ")
                 
-                if zipcode not in zip_list:
+                if zipcode not in zip_list: # a new topic just come from a new publisher
                     zip_list.append(zipcode)
                     #for this topic, set initial informations for the ownership and history function
                     cur_strength = 0
@@ -155,7 +162,6 @@ class Proxy:
                     history_vec = []
                     strengh_vec = []
                     pubInd = 0
-
                     pre_msg = []
                     cur_msg = []
 
@@ -169,16 +175,15 @@ class Proxy:
                     zipInd = zip_list.index(zipcode)
                     topic_msg, histry_msg, ownership, strengh_vec = self.scheduleInTopic(topic_info_queue[zipInd], msg)
                     
-
-                #Now register for the topic
+                #After orgaiize the msg for each topic, now register for the topics
                 self.registerHashRing(zipcode, topic_msg)
-                if self.newSub:#if it is a new subscriber, send the history messages
+                if self.newSub:#if it is a new subscriber, send the history messages also
                     self.registerHashRing(zipcode, histry_msg)
 
                 #Send the msg to the registered subscriber, give the key
                 self.sendToSubscriber(zipcode, histry_msg, ownership, strengh_vec)
 
-            if self.xpubsocket in events:
+            if self.xpubsocket in events: #a subscriber comes here
                 msg = self.xpubsocket.recv_multipart()
                 self.xsubsocket.send_multipart(msg)
 
