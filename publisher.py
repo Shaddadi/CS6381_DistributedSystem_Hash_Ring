@@ -40,6 +40,8 @@ class Publisher:
 			#print ("Sending: %i %i %i" % (zipcode, temperature, relhumidity))
 			self.socket.send_string("%i %i %i %i %i" % (zipcode, temperature, relhumidity, self.strength, history))
 			time.sleep(0.2)
+			pub_time_stamp =  time.time()
+			print pub_time_stamp
 
 	def close(self):
 		""" This method closes the PyZMQ socket. """
